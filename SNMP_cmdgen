@@ -1,0 +1,19 @@
+from pysnmp.entity.rfc3413.oneliner import cmdgen
+
+obj=cmdgen.CommandGenerator()
+
+errorIndication, errorStatus, errorIndex, varBinds = obj.getCmd(
+ cmdgen.CommunityData('galileo'),
+ cmdgen.UdpTransportTarget(('50.242.94.227', '8061')),
+ '1.3.6.1.2.1.1.1.0'
+)
+
+if errorIndication:
+    print errorIndication
+else:
+    if errorStatus:
+        print '{0} at {1}' .format(errorStatus.prettyPrint(), errorIndex and varBinds[int(errorIndex)-1] or '?')
+    else:
+        for name, val in varBinds:
+            print  name
+            print val
