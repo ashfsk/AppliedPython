@@ -1,0 +1,33 @@
+import snmp_helper
+COMMUNITY_STRING= 'galileo'
+SNMP_PORT= 8061
+IP= '50.242.94.227'
+a_device = (IP, COMMUNITY_STRING, SNMP_PORT)
+OID1= '1.3.6.1.4.1.9.9.43.1.1.1.0'
+OID2= '1.3.6.1.4.1.9.9.43.1.1.2.0'
+OID3= '1.3.6.1.4.1.9.9.43.1.1.3.0'
+snmp_data=snmp_helper.snmp_get_oid(a_device, oid=OID1)
+runchange_old= snmp_helper.snmp_extract(snmp_data)
+snmp_data=snmp_helper.snmp_get_oid(a_device, oid=OID3)
+startupchanged_old=snmp_helper.snmp_extract(snmp_data)
+print 'uptime when running config changed {}' .format(runchange_old)
+print 'uptime when startup-config was changed {}' .format(startupchanged_old)
+while True:
+    snmp_data=snmp_helper.snmp_get_oid(a_device, oid=OID1)
+    runchange_new=snmp_helper.snmp_extract(snmp_data)
+    #print 'uptime when running config changed {}' .format(runchange_new)
+    if runchange_new==runchange_old:
+        pass
+    else:
+        snmp_data=snmp_helper.snmp_get_oid(a_device, oid=OID3)
+        startupchanged_new = snmp_helper.snmp_extract(snmp_data)
+        print 'uptime when startupconfig last changed {}' .format(startupchanged_new)
+        if startupchanged_new == 0:
+            print 'Startup-config has not been saved since last boot'
+        else:
+            if startupchanged_new==startupchanged_old:
+                print 'running config has changed but not saved to startup config'
+            else:
+                print 'running config has been saved to startup config'
+        startupchanged_old=startupchanged_new
+    runchange_old=runchange_new
