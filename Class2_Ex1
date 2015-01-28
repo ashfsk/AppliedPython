@@ -2,6 +2,23 @@ import snmp_helper
 import email_helper
 import datetime
 
+def sendemail(router_name, flag):
+    uptime=datetime.datetime.now()
+    if flag ==0:
+        subject = 'running_config changed'
+        message = 'running config changed on {} at {}' .format(router_name, uptime)
+    else:
+        subject = 'switch rebooted'
+        message = 'Switch {}rebooted  at {}' .format(router_name, uptime)
+    sender = 'abc@gmail.com'
+    recipient = 'abc@gmail.com'
+    email_helper.send_mail(recipient, subject, message, sender)
+    if True:
+        print 'email has been sent'
+    else:
+        print 'email has not been sent'
+
+
 def main():
     a_user='pysnmp'
     auth_key= 'galileo1'
@@ -20,7 +37,6 @@ def main():
         run_change_old= snmp_helper.snmp_extract(snmp_data)
         snmp_name=snmp_helper.snmp_get_oid_v3(dev, snmp_user, oid=OID_name)
         rtr_name=snmp_helper.snmp_extract(snmp_name)
-       
         run_change_old_dict.update({rtr_name:run_change_old})
     while True:
         time.sleep(30)
@@ -32,22 +48,15 @@ def main():
             rtr_name=snmp_helper.snmp_extract(snmp_name)
             run_change_old=run_change_old_dict[rtr_name]
            
+            if runchange_new>run_change_old:
+                sendemail(rtr_name, 0)
+            elif runchange_new<run_change_old:
+                sendemail(rtr_name, 1)
 
-        if runchange_new>run_change_old:
-            uptime=datetime.datetime.now()
-            subject = 'running_config changed'
-            message = 'running config changed on {} at {}' .format(rtr_name, uptime)
-            sender = 'abc@gmail.com'
-            recipient = 'abc@gmail.com'
-            email_helper.send_mail(recipient, subject, message, sender)
-            if True:
-                print 'email has been sent'
-            else:
-                print 'email has not been sent'
-         run_change_old_dict.update({rtr_name:runchange_new})
+            run_change_old_dict.update({rtr_name:runchange_new})
 
 
 
 if __name__=='__main__':
     main()
-
+                                                              
