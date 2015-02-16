@@ -1,0 +1,22 @@
+from jsonrpclib import Server
+from pprint import pprint
+
+ip ='50.242.94.227'
+port='8443'
+username='eapi'
+password='XXXX'
+switch_url="https://{}:{}@{}:{}/command-api".format(username, password, ip, port)
+print switch_url
+conn=Server(switch_url)
+command=conn.runCmds(1, ['show interfaces  '])
+interface_list= command[0]['interfaces']
+for interface in interface_list.keys():
+    per_interface=interface_list[interface]
+
+
+    if per_interface.has_key('interfaceCounters'):
+
+        inoct=per_interface['interfaceCounters']['inOctets']
+        print "Inoctets on interface {} is {}".format(interface, inoct)
+        outoct=per_interface['interfaceCounters']['outOctets']
+        print "Outoctets on interface {} is {}".format(interface, outoct)
