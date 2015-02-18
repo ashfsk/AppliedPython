@@ -6,40 +6,50 @@ import argparse
 def main():
     #######Using argparse####
     parser = argparse.ArgumentParser()
-    parser.add_argument('--name',nargs='+', action='store', dest='vlan_details', default=False)
-    parser.add_argument('--remove', action='store', dest='remove_vlan_id', default=False)
-    results=parser.parse_args()
+    parser.add_argument('--name', action='store', help='name of the vlan',  dest='vlan_name', default=False)
+    parser.add_argument('--remove', action='store_true',help='option to delete a vlan', default=False)
+    parser.add_argument('vlan_id', action='store',help='vlan id to be created or removed')
 
+    results=parser.parse_args()
+    
     ########Creating the connection#######
-    eapi_params=dict(hostname='50.242.94.227', port=8443, username='eapi', password='XXXX')
+    eapi_params=dict(hostname='50.242.94.227', port=8443, username='eapi', password='ZZteslaX')
     conn=eapilib.create_connection(**eapi_params)
 
 
     #######checking if remove vlan or create vlan####
-    if results.remove_vlan_id != False:
+    if results.remove != False:
         output=conn.run_commands(['show vlan'])
+        
         ###Verify if vlan exists. Only then remove it####
-        if output[0]['vlans'].has_key(results.remove_vlan_id):
+        if output[0]['vlans'].has_key(results.vlan_id):
             ###Storing the vlan_id to be removed in a variable###
-            remove_vlan_id='no vlan ' + results.remove_vlan_id
+            remove_vlan_id='no vlan ' + results.vlan_id
             conn.config([remove_vlan_id])
             pprint(conn.run_commands(['show vlan' ]))
         else:
-            print 'Vlan {} does not exist to be removed'.format(results.remove_vlan_id)
+            print 'Vlan {} does not exist to be removed'.format(results.vlan_id)
     else:
-        vlan_exist=results.vlan_details[1]
-        vlan_id=results.vlan_details[1]
-        vlan_name=results.vlan_details[0]
+        vlan_exist=results.vlan_id
+        print vlan_exist
+        vlan_id=results.vlan_id
+        
+        
         vlan_id='vlan ' + vlan_id
-        vlan_name='name ' + vlan_name
+        
         ####Parse the output of show vlan to see if the vlan exists####
         output=conn.run_commands(['show vlan'])
-        if output[0]['vlans'].has_key(vlan_exist):
+ if output[0]['vlans'].has_key(vlan_exist):
             print 'vlan {} already exists'.format(vlan_exist)
         else:
-            conn.config([vlan_id,  vlan_name])
-            pprint(conn.run_commands(['show vlan' ]))
-
-
+            if results.vlan_name != False:
+                vlan_name='name ' + results.vlan_name
+                conn.config([vlan_id,  vlan_name])
+                pprint(conn.run_commands(['show vlan' ]))
+            else:
+                conn.config([vlan_id])
+                pprint(conn.run_commands(['show vlan' ]))
 if __name__=="__main__":
     main()
+
+        
