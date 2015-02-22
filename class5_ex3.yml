@@ -1,0 +1,8 @@
+---
+
+ - name: Add vlan
+   hosts: arista
+
+   tasks:
+     - name: add vlan module
+       add_vlan: eapi_username=eapi eapi_password=ZZteslaX eapi_hostname=50.242.94.227 eapi_port=8443 vlanid=702 vlan_name=animal
